@@ -7,7 +7,11 @@ export async function POST(request: NextRequest) {
         const { email } = await request.json();
 
         if (!email) {
-            return NextResponse.json({ error: 'Email requis' }, { status: 400 });
+            const response = NextResponse.json({ error: 'Email requis' }, { status: 400 });
+            response.headers.set('Access-Control-Allow-Origin', '*');
+            response.headers.set('Access-Control-Allow-Methods', 'POST, OPTIONS');
+            response.headers.set('Access-Control-Allow-Headers', 'Content-Type');
+            return response;
         }
 
         console.log(`🔐 Demande de code 2FA pour: ${email}`);
@@ -21,7 +25,11 @@ export async function POST(request: NextRequest) {
         });
 
         if (!admin) {
-            return NextResponse.json({ error: 'Compte administrateur non trouvé' }, { status: 404 });
+            const response = NextResponse.json({ error: 'Compte administrateur non trouvé' }, { status: 404 });
+            response.headers.set('Access-Control-Allow-Origin', '*');
+            response.headers.set('Access-Control-Allow-Methods', 'POST, OPTIONS');
+            response.headers.set('Access-Control-Allow-Headers', 'Content-Type');
+            return response;
         }
 
         // Générer le code 2FA
@@ -42,20 +50,44 @@ export async function POST(request: NextRequest) {
         
         if (emailSent) {
             console.log(`✅ Code 2FA généré et envoyé à ${email}`);
-            return NextResponse.json({ 
+            const response = NextResponse.json({ 
                 message: 'Code de sécurité envoyé par email',
                 expiresIn: '10 minutes'
             });
+            response.headers.set('Access-Control-Allow-Origin', '*');
+            response.headers.set('Access-Control-Allow-Methods', 'POST, OPTIONS');
+            response.headers.set('Access-Control-Allow-Headers', 'Content-Type');
+            return response;
         } else {
             // Fallback: retourner succès même si email échoue
             console.log(`⚠️ Code généré mais email non envoyé pour ${email}`);
-            return NextResponse.json({ 
+            const response = NextResponse.json({ 
                 message: 'Code généré mais problème d\'envoi email',
                 expiresIn: '10 minutes'
             });
+            response.headers.set('Access-Control-Allow-Origin', '*');
+            response.headers.set('Access-Control-Allow-Methods', 'POST, OPTIONS');
+            response.headers.set('Access-Control-Allow-Headers', 'Content-Type');
+            return response;
         }
     } catch (error) {
         console.error('Erreur demande 2FA:', error);
-        return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 });
+        const response = NextResponse.json({ error: 'Erreur serveur' }, { status: 500 });
+        response.headers.set('Access-Control-Allow-Origin', '*');
+        response.headers.set('Access-Control-Allow-Methods', 'POST, OPTIONS');
+        response.headers.set('Access-Control-Allow-Headers', 'Content-Type');
+        return response;
     }
+}
+
+// Méthode OPTIONS pour les requêtes preflight CORS
+export async function OPTIONS() {
+    return new NextResponse(null, {
+        status: 200,
+        headers: {
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'POST, OPTIONS',
+            'Access-Control-Allow-Headers': 'Content-Type',
+        },
+    });
 }
