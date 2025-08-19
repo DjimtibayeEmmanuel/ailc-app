@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Upload Excel</title>
+</head>
+<body>
+    <h2>Test d'upload de fichiers Excel</h2>
+    
+    <form>
+        <p>Test des nouveaux types supportés:</p>
+        <input type="file" accept=".mp3,.wav,.mp4,.avi,.mov,.wmv,.flv,.pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg,.gif,.zip,.rar" multiple>
+        <br><br>
+        
+        <p><strong>Formats supportés:</strong></p>
+        <ul>
+            <li>📄 Documents: PDF, Word, <strong>Excel</strong></li>
+            <li>🎵 Audio: MP3, WAV</li>
+            <li>🎥 Vidéo: MP4, AVI, MOV</li>
+            <li>🖼️ Images: PNG, JPG</li>
+            <li>🗜️ Archives: ZIP, RAR</li>
+        </ul>
+        
+        <p><strong>Taille max: 100MB par fichier</strong> (avant: 50MB)</p>
+    </form>
+    
+    <script>
+        const input = document.querySelector('input[type="file"]');
+        input.addEventListener('change', (e) => {
+            const files = Array.from(e.target.files);
+            console.log('Fichiers sélectionnés:', files);
+            files.forEach(file => {
+                console.log(`- ${file.name} (${file.type}, ${(file.size/1024/1024).toFixed(2)}MB)`);
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Upload AWS S3 - AILC Tchad</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #34495e;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        button {
+            background: #3498db;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+        }
+        button:hover {
+            background: #2980b9;
+        }
+        button:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        .success {
+            background: #d5edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+        .file-info {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .loading {
+            text-align: center;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Test Upload AWS S3</h1>
+        <p style="text-align: center; color: #6c757d;">
+            Testez l'upload de fichiers vers AWS S3 pour AILC Tchad
+        </p>
+
+        <form id="uploadForm">
+            <div class="form-group">
+                <label for="reportId">ID du signalement (Test) :</label>
+                <input type="text" id="reportId" name="reportId" value="test-report-123" required>
+                <small style="color: #6c757d;">Utilisez un ID de signalement existant ou créez un test</small>
+            </div>
+
+            <div class="form-group">
+                <label for="file">Sélectionner un fichier :</label>
+                <input type="file" id="file" name="file" required>
+                <small style="color: #6c757d;">
+                    Types acceptés: PDF, DOC, DOCX, JPG, PNG, GIF, TXT, ZIP, RAR (max 10MB)
+                </small>
+            </div>
+
+            <div class="form-group">
+                <label for="isPublic">Type d'accès :</label>
+                <select id="isPublic" name="isPublic">
+                    <option value="false">Privé (URL signée)</option>
+                    <option value="true">Public (accès direct)</option>
+                </select>
+            </div>
+
+            <button type="submit" id="submitBtn">
+                📤 Uploader le fichier
+            </button>
+        </form>
+
+        <div id="result"></div>
+    </div>
+
+    <script>
+        document.getElementById('uploadForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const submitBtn = document.getElementById('submitBtn');
+            const resultDiv = document.getElementById('result');
+            const fileInput = document.getElementById('file');
+            const reportIdInput = document.getElementById('reportId');
+            const isPublicSelect = document.getElementById('isPublic');
+            
+            // Vérifications
+            if (!fileInput.files[0]) {
+                showResult('error', 'Veuillez sélectionner un fichier');
+                return;
+            }
+            
+            const file = fileInput.files[0];
+            const reportId = reportIdInput.value.trim();
+            const isPublic = isPublicSelect.value;
+            
+            // Afficher les infos du fichier
+            showFileInfo(file);
+            
+            // Désactiver le bouton et afficher le chargement
+            submitBtn.disabled = true;
+            submitBtn.textContent = '⏳ Upload en cours...';
+            
+            try {
+                // Créer le FormData
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('reportId', reportId);
+                formData.append('isPublic', isPublic);
+                
+                console.log('🚀 Début upload:', {
+                    fileName: file.name,
+                    fileSize: file.size,
+                    fileType: file.type,
+                    reportId: reportId,
+                    isPublic: isPublic
+                });
+                
+                // Envoyer la requête
+                const response = await fetch('/api/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                console.log('📥 Réponse reçue:', result);
+                
+                if (response.ok && result.success) {
+                    showResult('success', 
+                        `✅ Fichier uploadé avec succès !<br>
+                        <strong>Nom:</strong> ${result.file.name}<br>
+                        <strong>Taille:</strong> ${formatFileSize(result.file.size)}<br>
+                        <strong>Type:</strong> ${result.file.type}<br>
+                        <strong>URL:</strong> <a href="${result.file.url}" target="_blank">Voir le fichier</a><br>
+                        <strong>Date:</strong> ${new Date(result.file.uploadDate).toLocaleString('fr-FR')}`
+                    );
+                    
+                    // Reset form
+                    document.getElementById('uploadForm').reset();
+                    
+                } else {
+                    showResult('error', `❌ Erreur: ${result.error || 'Erreur inconnue'}`);
+                }
+                
+            } catch (error) {
+                console.error('💥 Erreur upload:', error);
+                showResult('error', `💥 Erreur réseau: ${error.message}`);
+            } finally {
+                // Réactiver le bouton
+                submitBtn.disabled = false;
+                submitBtn.textContent = '📤 Uploader le fichier';
+            }
+        });
+        
+        function showFileInfo(file) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = `
+                <div class="file-info">
+                    <h4>📋 Informations du fichier :</h4>
+                    <strong>Nom:</strong> ${file.name}<br>
+                    <strong>Taille:</strong> ${formatFileSize(file.size)}<br>
+                    <strong>Type:</strong> ${file.type}<br>
+                    <strong>Dernière modification:</strong> ${new Date(file.lastModified).toLocaleString('fr-FR')}
+                </div>
+                <div class="loading">
+                    ⏳ Préparation de l'upload...
+                </div>
+            `;
+        }
+        
+        function showResult(type, message) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = `<div class="result ${type}">${message}</div>`;
+        }
+        
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+        
+        // Validation en temps réel
+        document.getElementById('file').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                // Vérifier la taille (10MB max)
+                if (file.size > 10 * 1024 * 1024) {
+                    showResult('error', '❌ Fichier trop volumineux (max 10MB)');
+                    e.target.value = '';
+                    return;
+                }
+                
+                // Vérifier le type
+                const allowedTypes = [
+                    'application/pdf',
+                    'application/msword',
+                    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                    'image/jpeg',
+                    'image/jpg', 
+                    'image/png',
+                    'image/gif',
+                    'text/plain',
+                    'application/zip',
+                    'application/x-rar-compressed'
+                ];
+                
+                if (!allowedTypes.includes(file.type)) {
+                    showResult('error', `❌ Type de fichier non autorisé: ${file.type}`);
+                    e.target.value = '';
+                    return;
+                }
+                
+                showResult('info', `✅ Fichier valide: ${file.name} (${formatFileSize(file.size)})`);
+            }
+        });
+    </script>
+</body>
+</html>
