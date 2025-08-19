@@ -45,31 +45,25 @@ export async function POST(request: NextRequest) {
             }
         });
 
-        // Envoyer l'email avec retry automatique
-        const emailSent = await send2FAEmail(email, code);
-        
-        if (emailSent) {
-            console.log(`✅ Code 2FA généré et envoyé à ${email}`);
-            const response = NextResponse.json({ 
-                message: 'Code de sécurité envoyé par email',
-                expiresIn: '10 minutes'
-            });
-            response.headers.set('Access-Control-Allow-Origin', '*');
-            response.headers.set('Access-Control-Allow-Methods', 'POST, OPTIONS');
-            response.headers.set('Access-Control-Allow-Headers', 'Content-Type');
-            return response;
-        } else {
-            // Fallback: retourner succès même si email échoue
-            console.log(`⚠️ Code généré mais email non envoyé pour ${email}`);
-            const response = NextResponse.json({ 
-                message: 'Code généré mais problème d\'envoi email',
-                expiresIn: '10 minutes'
-            });
-            response.headers.set('Access-Control-Allow-Origin', '*');
-            response.headers.set('Access-Control-Allow-Methods', 'POST, OPTIONS');
-            response.headers.set('Access-Control-Allow-Headers', 'Content-Type');
-            return response;
+        // Envoyer l'email avec retry automatique (ou skip si config manquante)
+        let emailSent = false;
+        try {
+            emailSent = await send2FAEmail(email, code);
+        } catch (emailError) {
+            console.log(`⚠️ Erreur envoi email, continuons sans: ${emailError}`);
         }
+        
+        // Toujours retourner succès pour éviter le blocage
+        console.log(`✅ Code 2FA généré pour ${email} - Email ${emailSent ? 'envoyé' : 'ignoré'}`);
+        const response = NextResponse.json({ 
+            message: emailSent ? 'Code de sécurité envoyé par email' : 'Code généré (vérifiez la console)',
+            expiresIn: '10 minutes',
+            code: process.env.NODE_ENV === 'development' ? code : undefined // Debug en dev uniquement
+        });
+        response.headers.set('Access-Control-Allow-Origin', '*');
+        response.headers.set('Access-Control-Allow-Methods', 'POST, OPTIONS');
+        response.headers.set('Access-Control-Allow-Headers', 'Content-Type');
+        return response;
     } catch (error) {
         console.error('Erreur demande 2FA:', error);
         const response = NextResponse.json({ error: 'Erreur serveur' }, { status: 500 });
