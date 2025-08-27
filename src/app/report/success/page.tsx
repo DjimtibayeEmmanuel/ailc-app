@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import ReportSuccess from '@/components/ReportSuccess';
 
-export default function ReportSuccessPage() {
+export  default async function ReportSuccessPage() {
   const [reportData, setReportData] = useState<{trackingCode: string, reportId: string} | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();

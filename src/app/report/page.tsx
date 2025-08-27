@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import ReportForm from '@/components/ReportForm';
 
-export default function ReportPage() {
+export default async  function ReportPage() {
   const router = useRouter();
 
   const handleReportSuccess = (trackingCode: string, reportId: string) => {
