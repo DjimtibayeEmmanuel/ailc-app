@@ -12,7 +12,7 @@ export default async function LoginPage({ searchParams }: Props) {
 
   // Si l'utilisateur est déjà connecté et est admin, rediriger vers /admin
   if (session?.user && (session.user as any).isAdmin) {
-    redirect('/admin');
+    return redirect('/admin');
   }
 
   return <LoginForm error={searchParams?.error} />;
