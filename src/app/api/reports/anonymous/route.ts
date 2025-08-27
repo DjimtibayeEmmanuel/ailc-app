@@ -49,10 +49,10 @@ export async function POST(request: NextRequest) {
 
         const validatedData = validationResult.data;
         const {
-            corruptionType, sector, sectorName, severity, incidentDate, location, description,
+            corruptionType, sector, sectorName, urgency, incidentDate, location, description,
             amountRange, suspectNames, suspectPositions, suspectInstitution, witnesses,
             relationToFacts, anonymity, reporterName, reporterPhone, reporterEmail,
-            urgency, circumstances, frequency, impact, witnessContacts, files
+            circumstances, frequency, impact, witnessContacts, files
         } = validatedData;
         
         // Mapper les montants vers des valeurs numériques pour la base de données
@@ -68,14 +68,14 @@ export async function POST(request: NextRequest) {
             amount = amountMapping[amountRange] || null;
         }
         
-        // Mapper la gravité pour la base de données
-        const severityMapping: Record<string, string> = {
+        // Mapper l'urgence pour la base de données
+        const urgencyMapping: Record<string, string> = {
             'faible': 'low',
-            'moyen': 'medium', 
-            'eleve': 'high',
+            'moyenne': 'medium', 
+            'haute': 'high',
             'critique': 'critical'
         };
-        const mappedSeverity = severityMapping[severity] || severity;
+        const mappedUrgency = urgencyMapping[urgency] || urgency;
         
         // Mapper l'anonymat pour la base de données
         const anonymityMapping: Record<string, string> = {
@@ -132,7 +132,7 @@ export async function POST(request: NextRequest) {
         console.log('📊 Données mappées:', { 
             corruptionType, 
             sector, 
-            severity: mappedSeverity, 
+            urgency: mappedUrgency, 
             anonymity: mappedAnonymity,
             amount 
         });
@@ -147,7 +147,7 @@ export async function POST(request: NextRequest) {
                     userId: null,
                     corruptionType,
                     sector,
-                    severity: mappedSeverity,
+                    severity: mappedUrgency,
                     incidentDate: new Date(incidentDate),
                     location,
                     description,

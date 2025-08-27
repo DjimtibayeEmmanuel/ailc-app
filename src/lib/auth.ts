@@ -8,7 +8,7 @@ export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
   providers: [
     CredentialsProvider({
-      name: "credentials",
+      name: "admin-login",
       credentials: {
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" }
@@ -18,16 +18,18 @@ export const authOptions: NextAuthOptions = {
           return null
         }
 
+        // Vérifier l'utilisateur admin
         const user = await prisma.user.findUnique({
           where: {
             email: credentials.email
           }
         })
 
-        if (!user || !user.password) {
+        if (!user || !user.password || !user.isAdmin) {
           return null
         }
 
+        // Vérifier le mot de passe
         const isPasswordValid = await bcrypt.compare(
           credentials.password,
           user.password
@@ -47,7 +49,8 @@ export const authOptions: NextAuthOptions = {
     })
   ],
   session: {
-    strategy: "jwt"
+    strategy: "jwt",
+    maxAge: 24 * 60 * 60, // 24 heures
   },
   callbacks: {
     async jwt({ token, user }) {
@@ -64,7 +67,14 @@ export const authOptions: NextAuthOptions = {
       return session
     }
   },
+  events: {
+    async signIn({ user, account, profile }) {
+      // Log des connexions réussies
+      console.log('User signed in:', user.email);
+    }
+  },
   pages: {
-    signIn: "/auth/signin",
-  }
+    signIn: "/login",
+  },
+  secret: process.env.NEXTAUTH_SECRET,
 }

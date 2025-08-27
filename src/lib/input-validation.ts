@@ -74,10 +74,10 @@ export const ReportSchema = z.object({
     // Champs obligatoires du formulaire
     corruptionType: z.enum([
         'pot_de_vin', 'detournement', 'favoritisme', 'abus_pouvoir', 
-        'marche_public', 'concussion', 'autre'
+        'marche_public', 'concussion', 'racket', 'autre'
     ]).refine(val => val !== '', 'Type de corruption requis'),
     
-    sector: z.enum(['public', 'prive'])
+    sector: z.enum(['public', 'parapublic', 'prive'])
         .refine(val => val !== '', 'Secteur requis'),
     
     sectorName: z.string()
@@ -85,8 +85,8 @@ export const ReportSchema = z.object({
         .max(200, 'Nom du secteur trop long')
         .refine(val => val.trim() !== '', 'Nom du secteur requis'),
     
-    severity: z.enum(['faible', 'moyen', 'eleve', 'critique'])
-        .refine(val => val !== '', 'Niveau de gravité requis'),
+    urgency: z.enum(['faible', 'moyenne', 'haute', 'critique'])
+        .refine(val => val !== '', 'Niveau d\'urgence requis'),
     
     incidentDate: z.string()
         .regex(/^\d{4}-\d{2}-\d{2}$/, 'Format de date invalide (YYYY-MM-DD)')
@@ -116,7 +116,6 @@ export const ReportSchema = z.object({
         .refine(val => val !== '', 'Veuillez sélectionner une fourchette de montant'),
     
     // Champs optionnels
-    urgency: z.string().optional(),
     circumstances: z.string().max(2000).optional(),
     frequency: z.string().optional(),
     impact: z.string().max(1000).optional(),

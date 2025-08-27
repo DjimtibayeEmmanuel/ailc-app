@@ -4,13 +4,13 @@ import crypto from 'crypto';
 function validateEncryptionKey(): string {
     const key = process.env.ENCRYPTION_KEY;
     if (!key) {
-        throw new Error('ENCRYPTION_KEY non définie dans les variables d\'environnement');
+        throw new Error('Configuration de sécurité manquante');
     }
     if (key === 'ailc_tchad_encryption_key_32_chars') {
-        throw new Error('SÉCURITÉ: Clé de chiffrement par défaut détectée. Générez une clé unique.');
+        throw new Error('Configuration de sécurité par défaut non sécurisée');
     }
     if (key.length !== 32) {
-        throw new Error('ENCRYPTION_KEY doit faire exactement 32 caractères');
+        throw new Error('Configuration de sécurité incorrecte');
     }
     return key;
 }

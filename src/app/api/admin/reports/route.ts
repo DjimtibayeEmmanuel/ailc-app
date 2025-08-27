@@ -1,31 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { decrypt } from '@/lib/encryption';
-import { verifyJWT } from '@/lib/jwt-config';
-
-// Middleware pour vérifier l'authentification admin
-function verifyAdminToken(request: NextRequest) {
-    const authHeader = request.headers.get('authorization');
-    const token = authHeader?.split(' ')[1];
-
-    if (!token) {
-        return { error: 'Token d\'accès requis', status: 401 };
-    }
-
-    try {
-        const decoded = verifyJWT(token);
-        if (!decoded.is_admin) {
-            return { error: 'Accès administrateur requis', status: 403 };
-        }
-        return { user: decoded };
-    } catch (error) {
-        return { error: 'Token invalide', status: 403 };
-    }
-}
+import { verifyAdminSession } from '@/lib/admin-auth';
 
 // GET - Récupérer tous les signalements
 export async function GET(request: NextRequest) {
-    const authResult = verifyAdminToken(request);
+    const authResult = await verifyAdminSession(request);
     if (authResult.error) {
         return NextResponse.json({ error: authResult.error }, { status: authResult.status });
     }

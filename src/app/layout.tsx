@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { SessionProvider } from "next-auth/react";
+import AuthProvider from "./components/AuthProvider";
 
 export const metadata: Metadata = {
   title: "AILC Tchad - Signalement de Corruption",
@@ -14,7 +16,9 @@ export default function RootLayout({
   return (
     <html lang="fr">
       <body className="antialiased">
-        {children}
+        <AuthProvider>
+          {children}
+        </AuthProvider>
       </body>
     </html>
   );

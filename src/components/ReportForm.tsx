@@ -368,6 +368,7 @@ export default function ReportForm({ onBack, onSuccess }: ReportFormProps) {
           >
             <option value="">Sélectionnez le secteur</option>
             <option value="public">Secteur Public</option>
+            <option value="parapublic">Parapublic</option>
             <option value="prive">Secteur Privé</option>
           </select>
         </div>

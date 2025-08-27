@@ -1,18 +1,9 @@
 'use client';
 
+import Link from 'next/link';
 import LegalProtectionInfo from './LegalProtectionInfo';
 
-interface MainOptionsProps {
-  onShowAdmin: () => void;
-  onShowReportForm: () => void;
-  onShowTracking: () => void;
-}
-
-export default function MainOptions({ 
-  onShowAdmin, 
-  onShowReportForm, 
-  onShowTracking 
-}: MainOptionsProps) {
+export default function MainOptions() {
   return (
     <div className="modern-homepage">
       {/* Hero Section avec fond en dégradé */}
@@ -60,7 +51,7 @@ export default function MainOptions({
 
         <div className="action-cards">
           {/* Carte Signaler */}
-          <div className="action-card primary-card" onClick={onShowReportForm}>
+          <Link href="/report" className="action-card primary-card">
             <div className="card-icon">
               <div className="icon-wrapper report-icon">
                 📢
@@ -77,10 +68,10 @@ export default function MainOptions({
               </div>
             </div>
             <div className="card-arrow">→</div>
-          </div>
+          </Link>
 
           {/* Carte Suivre */}
-          <div className="action-card" onClick={onShowTracking}>
+          <Link href="/track" className="action-card">
             <div className="card-icon">
               <div className="icon-wrapper track-icon">
                 🔍
@@ -96,10 +87,10 @@ export default function MainOptions({
               </div>
             </div>
             <div className="card-arrow">→</div>
-          </div>
+          </Link>
 
           {/* Carte Admin */}
-          <div className="action-card admin-card" onClick={onShowAdmin}>
+          <Link href="/admin" className="action-card admin-card">
             <div className="card-icon">
               <div className="icon-wrapper admin-icon">
                 ⚙️
@@ -115,7 +106,7 @@ export default function MainOptions({
               </div>
             </div>
             <div className="card-arrow">→</div>
-          </div>
+          </Link>
         </div>
 
         {/* Footer informatif */}

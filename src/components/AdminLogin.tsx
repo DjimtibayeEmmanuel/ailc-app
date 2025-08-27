@@ -57,7 +57,7 @@ export default function AdminLogin({ onBack, onLoginSuccess }: AdminLoginProps) 
     setError('');
 
     try {
-      const response = await fetch('/api/admin-login', {
+      const response = await fetch('/api/le-login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
